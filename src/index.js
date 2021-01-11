@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-//import SeasonDisplay from './SeasonDisplay';
-
+import SeasonDisplay from './SeasonDisplay';
+import Spinner from './Spinner';
 // const App = () => {
 
   
@@ -15,35 +15,51 @@ import ReactDOM from 'react-dom';
 class App extends React.Component {
 
   //a JS method not specific to React. constructor means the first method to be called any time an instance of this class is created. Not mandatory
+  /*
   constructor(props) {
     super(props);  //constructor in App naturally overrides constructor in React.Component; but to make sure what's in the constuctor in React.Component can still be called, we need to super it.
     
     //this is the only time we do direct assignment to this.state
     this.state = {lat: null, errorMessage: ''}; //initialize state
+  }
+  */
 
+  state = {lat:null, errorMessage: ''}; //this is the same as this.state ={ ... } inside constructor(props){...}
+
+  //life cycle method: optionally define, will be called at specific timing during the life cycle!
+  componentDidMount(){
     window.navigator.geolocation.getCurrentPosition(
-      (position) => {
+      (position) =>  this.setState({lat: position.coords.latitude}),
         //call setState to update state OBJECT!!! do not do direct assignment!!!
-        this.setState({lat: position.coords.latitude});
-      },
-      (err) => {
-        this.setState({errorMessage: err.message})
-      }
-    );
+      (err) => this.setState({errorMessage: err.message})
+
+    )
+    
+  }
+  componentDidUpdate(){
+    console.log('My component did update!')
   }
 
-  //render method is required for every class. Must also DEFINE it. called everytime state changes
-  //do not call API in render()
-  render() {
-    
+  renderContent() {
     if(this.state.errorMessage && !this.state.lat) {
       return <div>Error: {this.state.errorMessage}</div>
     }
 
     if (!this.state.errorMessage && this.state.lat){
-      return <div>Latitude: {this.state.lat}</div>
+      return <SeasonDisplay lat={this.state.lat} />
     }
-    return <div>Loading!</div>
+    return <Spinner message="Please accept location request" />;
+  }
+  // ^when have multiple return condition, put them into a helper function. This way they can also share some common element
+
+  //render method is required for every class. Must also DEFINE it. called everytime state changes
+  //do not call API in render()
+  render() {
+    
+    return (<div className = "border red">
+      {this.renderContent()}
+    </div>
+    );
   }
 }
 
